@@ -3,14 +3,16 @@ Name: James Castle
 CS 7343 Project 1
 Purpose: Complete example of threading application and process scheduling algorithms
 **********************/
-#include <iostream>
-#include <vector>
-#include <thread>
+#include <iostream> // to read in files
+#include <vector> // For 2d vectors
+#include <thread> // for threading in fibCalc
 #include <fstream> // For file writing/reading
 #include <sstream> // for file parsing
+#include <algorithm> // for sort()
 
 std::vector<int> fibArray;
 std::vector<std::vector<int>> schedAlgos;
+int sortColNum = 0;
 
 void fibCalc(){
     // job for child thread that completes before parent continues
@@ -101,7 +103,7 @@ void fcfs (){
     std::vector<std::vector<int>> fcfsScheduler;
     fcfsScheduler = schedAlgos;
     std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
-    int currentTime = 0;
+    int currentTime = -1;
 
     std::cout << "****************FCFS Algorithm Demonstration****************" << std::endl;
     //Iterate through all processes in a FCFS fashion
@@ -135,9 +137,70 @@ void fcfs (){
         std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
         fcfsScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
     }
-
-    std::cout << "done" << std::endl;
+    std::cout << "FCFS done" << std::endl;
 }
+
+bool sortcol(std::vector<int> &v1, const std::vector<int> &v2){
+    // From https://www.geeksforgeeks.org/sorting-2d-vector-in-c-set-1-by-row-and-column/
+    return v1[sortColNum] < v2[sortColNum];
+}
+
+void sjf(){
+    // bring in the process array and make a copy
+    std::vector<std::vector<int>> sjfScheduler;
+    sjfScheduler = schedAlgos;
+    std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
+    int currentTime = -1;
+
+    //Print Queue (BEFORE SORT)
+    std::cout << "\nProcesses in Queue before Sorting: ";
+    for (int j = 0; j < sjfScheduler.size(); j++){
+        std::cout << 'T' << sjfScheduler[j][0];
+        if(j < (sjfScheduler.size()-1)) {
+            std::cout << " ,";
+        }
+    }
+
+    // Sort Queue based on burst time
+    sortColNum = 2; // Column to sort on (CPU Burst)
+    sort(sjfScheduler.begin(), sjfScheduler.end(), sortcol);
+
+    std::cout << "\n****************SJF Algorithm Demonstration****************" << std::endl;
+    //Iterate through all processes in a SJF fashion
+    while (it != sjfScheduler.end()) {
+        it = sjfScheduler.begin();
+        int burstStart = sjfScheduler[0][2]; // Set Burst time of current process
+        int burstLeft = burstStart;
+
+        //Print Queue
+        std::cout << "Processes in Queue: ";
+        for (int j = 0; j < sjfScheduler.size(); j++){
+            std::cout << 'T' << sjfScheduler[j][0];
+            if(j < (sjfScheduler.size()-1)) {
+                std::cout << " ,";
+            }
+        }
+        //Print Process to be scheduled
+        std::cout << "\nProcess to be scheduled: T" << sjfScheduler[0][0];
+        while(burstLeft > 0){
+            burstLeft--;
+            sjfScheduler[0][2] = burstLeft;
+            currentTime++;
+        }
+        // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+        int finishTime = 1 + currentTime;
+        int trt = finishTime - 0; // since all tasks arrive at T = 0
+        int waitTime  = trt - burstStart;
+        std::cout << "\nProcess Scheduling Metrics for Process T" << sjfScheduler[0][0] << ": " << std::endl;
+        std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+        std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+        std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+        sjfScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+    }
+    std::cout << "FCFS done" << std::endl;
+}
+
+
 
 int main(){
     // ********** Q1 *****************
@@ -161,6 +224,7 @@ int main(){
     // Illustrate FCFS
     fcfs();
     // Illustrate SJF
+    sjf();
     // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
     // Illustrate RR with a time quantum of 10;
 
