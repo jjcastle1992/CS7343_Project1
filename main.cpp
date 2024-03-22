@@ -96,6 +96,49 @@ void readFromFile(const std::string &filename) {
     }
 }
 
+void fcfs (){
+    // bring in the process array and make a copy
+    std::vector<std::vector<int>> fcfsScheduler;
+    fcfsScheduler = schedAlgos;
+    std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
+    int currentTime = 0;
+
+    std::cout << "****************FCFS Algorithm Demonstration****************" << std::endl;
+    //Iterate through all processes in a FCFS fashion
+    while (it != fcfsScheduler.end()) {
+        it = fcfsScheduler.begin();
+        int burstStart = fcfsScheduler[0][2]; // Set Burst time of current process
+        int burstLeft = burstStart;
+
+        //Print Queue
+        std::cout << "Processes in Queue: ";
+        for (int j = 0; j < fcfsScheduler.size(); j++){
+            std::cout << 'T' << fcfsScheduler[j][0];
+            if(j < (fcfsScheduler.size()-1)) {
+                std::cout << " ,";
+            }
+        }
+        //Print Process to be scheduled
+        std::cout << "\nProcess to be scheduled: T" << fcfsScheduler[0][0];
+        while(burstLeft > 0){
+            burstLeft--;
+            fcfsScheduler[0][2] = burstLeft;
+            currentTime++;
+        }
+        // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+        int finishTime = 1 + currentTime;
+        int trt = finishTime - 0; // since all tasks arrive at T = 0
+        int waitTime  = trt - burstStart;
+        std::cout << "\nProcess Scheduling Metrics for Process T" << fcfsScheduler[0][0] << ": " << std::endl;
+        std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+        std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+        std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+        fcfsScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+    }
+
+    std::cout << "done" << std::endl;
+}
+
 int main(){
     // ********** Q1 *****************
     // Used this as guidance:
@@ -114,7 +157,9 @@ int main(){
     std::cout << "done" << std::endl;
 
     // Write out rep that shows timeline, process loaded, queue, pre-emption, and process completion
+
     // Illustrate FCFS
+    fcfs();
     // Illustrate SJF
     // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
     // Illustrate RR with a time quantum of 10;
