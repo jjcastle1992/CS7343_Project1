@@ -105,7 +105,7 @@ void fcfs (){
     std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
     int currentTime = -1;
 
-    std::cout << "****************FCFS Algorithm Demonstration****************" << std::endl;
+    std::cout << "\n****************FCFS Algorithm Demonstration****************" << std::endl;
     //Iterate through all processes in a FCFS fashion
     while (it != fcfsScheduler.end()) {
         it = fcfsScheduler.begin();
@@ -145,6 +145,11 @@ bool sortcol(std::vector<int> &v1, const std::vector<int> &v2){
     return v1[sortColNum] < v2[sortColNum];
 }
 
+bool sortcolAsc(std::vector<int> &v1, const std::vector<int> &v2){
+    // From https://www.geeksforgeeks.org/sorting-2d-vector-in-c-set-1-by-row-and-column/
+    return v1[sortColNum] > v2[sortColNum];
+}
+
 void sjf(){
     // bring in the process array and make a copy
     std::vector<std::vector<int>> sjfScheduler;
@@ -152,20 +157,21 @@ void sjf(){
     std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
     int currentTime = -1;
 
+    std::cout << "\n****************SJF Algorithm Demonstration****************" << std::endl;
+
     //Print Queue (BEFORE SORT)
-    std::cout << "\nProcesses in Queue before Sorting: ";
+    std::cout << "Processes in Queue before Sorting: ";
     for (int j = 0; j < sjfScheduler.size(); j++){
         std::cout << 'T' << sjfScheduler[j][0];
         if(j < (sjfScheduler.size()-1)) {
             std::cout << " ,";
         }
     }
-
+    std::cout << std::endl;
     // Sort Queue based on burst time
     sortColNum = 2; // Column to sort on (CPU Burst)
     sort(sjfScheduler.begin(), sjfScheduler.end(), sortcol);
 
-    std::cout << "\n****************SJF Algorithm Demonstration****************" << std::endl;
     //Iterate through all processes in a SJF fashion
     while (it != sjfScheduler.end()) {
         it = sjfScheduler.begin();
@@ -197,10 +203,64 @@ void sjf(){
         std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
         sjfScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
     }
-    std::cout << "FCFS done" << std::endl;
+    std::cout << "SJF done" << std::endl;
 }
 
+void prioritySched(){
+    // bring in the process array and make a copy
+    std::vector<std::vector<int>> priorityScheduler;
+    priorityScheduler = schedAlgos;
+    std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
+    int currentTime = -1;
 
+    std::cout << "\n****************Basic Priority Algorithm Demonstration****************" << std::endl;
+
+    //Print Queue (BEFORE SORT)
+    std::cout << "Processes in Queue before Sorting: ";
+    for (int j = 0; j < priorityScheduler.size(); j++){
+        std::cout << 'T' << priorityScheduler[j][0];
+        if(j < (priorityScheduler.size()-1)) {
+            std::cout << " ,";
+        }
+    }
+    std::cout << std::endl;
+    // Sort Queue based on PRIORITY
+    sortColNum = 1; // Column to sort on (PRIORITY)
+    sort(priorityScheduler.begin(), priorityScheduler.end(), sortcolAsc);
+
+    //Iterate through all processes in a Priority fashion
+    while (it != priorityScheduler.end()) {
+        it = priorityScheduler.begin();
+        int burstStart = priorityScheduler[0][2]; // Set Burst time of current process
+        int burstLeft = burstStart;
+
+        //Print Queue
+        std::cout << "Processes in Queue: ";
+        for (int j = 0; j < priorityScheduler.size(); j++){
+            std::cout << 'T' << priorityScheduler[j][0];
+            if(j < (priorityScheduler.size()-1)) {
+                std::cout << " ,";
+            }
+        }
+        //Print Process to be scheduled
+        std::cout << "\nProcess to be scheduled: T" << priorityScheduler[0][0];
+        while(burstLeft > 0){
+            burstLeft--;
+            priorityScheduler[0][2] = burstLeft;
+            currentTime++;
+        }
+        // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+        int finishTime = 1 + currentTime;
+        int trt = finishTime - 0; // since all tasks arrive at T = 0
+        int waitTime  = trt - burstStart;
+        std::cout << "\nProcess Scheduling Metrics for Process T" << priorityScheduler[0][0] << ": " << std::endl;
+        std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+        std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+        std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+        priorityScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+    }
+    std::cout << "Basic Priority done" << std::endl;
+}
 
 int main(){
     // ********** Q1 *****************
@@ -226,7 +286,10 @@ int main(){
     // Illustrate SJF
     sjf();
     // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
+    prioritySched();
     // Illustrate RR with a time quantum of 10;
+
+    // Illustrate Priority with Round RObin
 
     return 0;
 }
