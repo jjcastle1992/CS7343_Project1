@@ -484,6 +484,7 @@ int main(){
     // ********** Q2 *****************
     //Provide filename path
     std::string filename = R"(C:\Users\Wolf\Dropbox\Grad School\Spring 2024\CS 7343 Operating Systems\Project 1\schedule.txt)";
+//    std::string filename = "schedule.txt"; // Relative file path not working for some reason
     //Read the file
     readFromFile(filename);
     std::cout << "done" << std::endl;
