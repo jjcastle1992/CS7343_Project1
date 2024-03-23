@@ -15,6 +15,7 @@ std::vector<std::vector<int>> schedAlgos;
 int sortColNum = 0;
 
 void fibCalc(){
+    std::cout << "\n****************Fibonacci Threading Demonstration****************" << std::endl;
     // job for child thread that completes before parent continues
     int numbers = 0;
     std::cout << "How many Fibonacci numbers should I provide? (Positive ints only): ";
@@ -113,7 +114,7 @@ void fcfs (){
         int burstLeft = burstStart;
 
         //Print Queue
-        std::cout << "Processes in Queue: ";
+        std::cout << "\nProcesses in Queue: ";
         for (int j = 0; j < fcfsScheduler.size(); j++){
             std::cout << 'T' << fcfsScheduler[j][0];
             if(j < (fcfsScheduler.size()-1)) {
@@ -189,7 +190,7 @@ void sjf(){
         int burstLeft = burstStart;
 
         //Print Queue
-        std::cout << "Processes in Queue: ";
+        std::cout << "\nProcesses in Queue: ";
         for (int j = 0; j < sjfScheduler.size(); j++){
             std::cout << 'T' << sjfScheduler[j][0];
             if(j < (sjfScheduler.size()-1)) {
@@ -245,7 +246,7 @@ void prioritySched(){
         int burstLeft = burstStart;
 
         //Print Queue
-        std::cout << "Processes in Queue: ";
+        std::cout << "\nProcesses in Queue: ";
         for (int j = 0; j < priorityScheduler.size(); j++){
             std::cout << 'T' << priorityScheduler[j][0];
             if(j < (priorityScheduler.size()-1)) {
@@ -487,18 +488,52 @@ int main(){
     readFromFile(filename);
     std::cout << "done" << std::endl;
 
-    // Write out rep that shows timeline, process loaded, queue, pre-emption, and process completion
+    bool runAgain = true;
+    while(runAgain){
+        int schedulingChoice = 0;
+        std::cout << "Scheduling Algorithm Options: \n1)FCFS\n2)SJF\n3)Priority\n4)Round Robin\n5)Priority w/ Round Robin"
+        << "\n\n Please enter an into choose the algorithm to run: ";
+        std::cin >> schedulingChoice;
 
-    // Illustrate FCFS
+        switch(schedulingChoice) {
+            case 1:
+                fcfs();
+                break;
+            case 2:
+                sjf();
+                break;
+            case 3:
+                prioritySched();
+                break;
+            case 4:
+                basic_rr();
+                break;
+            case 5:
+                priorityRoundRobin();
+                break;
+            default:
+                std::cout << "ERROR: Invalid Choice" << std::endl;
+                break;
+        }
+        char again;
+        std::cout << "Try to run another algorithm? (Y/N)?: ";
+        std::cin >> again;
+        tolower(again);
+        if(again == 'n'){
+            runAgain = false;
+        }
+    }
+//    // All-in-One Run
+//    // Illustrate FCFS
 //    fcfs();
-    // Illustrate SJF
+//    // Illustrate SJF
 //    sjf();
-    // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
+//    // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
 //    prioritySched();
-    // Illustrate RR with a time quantum of 10;
+//    // Illustrate RR with a time quantum of 10;
 //    basic_rr();
-    // Illustrate Priority with Round Robin
-    priorityRoundRobin();
+//    // Illustrate Priority with Round Robin
+//    priorityRoundRobin();
 
     return 0;
 }
