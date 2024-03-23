@@ -339,6 +339,137 @@ void basic_rr() {
     std::cout << "Basic Round Robin done" << std::endl;
 }
 
+void priorityRoundRobin() {
+    int timeQuantum = 10;
+    // bring in the process array and make a copy
+    std::vector<std::vector<int>> priorityRrScheduler;
+    priorityRrScheduler = schedAlgos;
+    std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
+    int currentTime = -1;
+
+    std::cout << "\n****************Priority Round Robin Algorithm Demonstration****************" << std::endl;
+    //Print Queue (BEFORE SORT)
+    std::cout << "Processes in Queue before Sorting: ";
+    for (int j = 0; j < priorityRrScheduler.size(); j++){
+        std::cout << 'T' << priorityRrScheduler[j][0];
+        if(j < (priorityRrScheduler.size()-1)) {
+            std::cout << " ,";
+        }
+    }
+    std::cout << std::endl;
+
+    // Sort Queue based on PRIORITY
+    sortColNum = 1; // Column to sort on (PRIORITY)
+    sort(priorityRrScheduler.begin(), priorityRrScheduler.end(), sortcolAsc);
+
+    // Use priority scheduling UNLESS priority is the same, then RR
+    while (it != priorityRrScheduler.end()) {
+        it = priorityRrScheduler.begin();
+        int burstStart = priorityRrScheduler[0][2]; // Set Burst time of current process
+        int burstLeft = burstStart;
+
+        //Print Queue
+        std::cout << "\nProcesses in Queue: ";
+        for (int j = 0; j < priorityRrScheduler.size(); j++){
+            std::cout << 'T' << priorityRrScheduler[j][0];
+            if(j < (priorityRrScheduler.size()-1)) {
+                std::cout << " ,";
+            }
+        }
+        // IF QUEUE IS BIGGER THAN ONE, COMPARE PRIORITIES
+        if(priorityRrScheduler.size() > 1) {
+            // If size > 1, check to see if front 2 elements in queue are the same priority
+            if(priorityRrScheduler[0][1] == priorityRrScheduler[1][1]){
+                //use round robin until queue size is 1 or queue[0] and queue[1] have different priorities
+                // Start RR loop
+                int quantumLeft = timeQuantum;
+                //Print Process to be scheduled
+                std::cout << "\nProcess to be scheduled: T" << priorityRrScheduler[0][0] << " (Priority: " <<
+                priorityRrScheduler[0][1] <<")\nBurst Remaining: " << priorityRrScheduler[0][2];
+                while((burstLeft > 0) && (quantumLeft > 0)){
+                    burstLeft--;
+                    priorityRrScheduler[0][2] = burstLeft;
+                    currentTime++;
+                    quantumLeft--;
+                }
+                if ((burstLeft > 0) && (quantumLeft == 0)) {
+                    // Update the time left
+                    priorityRrScheduler[0][2] = burstLeft;
+                    // Swap items at position 1 and 0
+                    // Idea from https://stackoverflow.com/questions/6224830/c-trying-to-swap-values-in-a-vector
+                    std::iter_swap(priorityRrScheduler.begin(), priorityRrScheduler.begin() + 1);
+
+                    std::cout << "\nQuantum Ended. Burst remaining: " << burstLeft << "\nNew Process Scheduled." <<
+                              "\nCurrent Time: "<< currentTime << std::endl;
+                }
+
+                if (burstLeft == 0){
+                    // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+                    int finishTime = 1 + currentTime;
+                    int trt = finishTime - 0; // since all tasks arrive at T = 0
+                    //Find burstStart of original process
+                    const int searchId = priorityRrScheduler[0][0]; // Process ID
+                    int originalId = findIndexByID(schedAlgos, searchId); // returns ID of process in schedAlgos
+                    burstStart = schedAlgos[originalId][2];  // Sets burst start for process to original value
+                    int waitTime  = trt - burstStart;
+                    std::cout << "\nProcess Scheduling Metrics for Process T" << priorityRrScheduler[0][0] << ": " <<
+                    std::endl;
+                    std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+                    std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+                    std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+                    priorityRrScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+                }
+            }
+
+            // THEY'RE NOT THE SAME, SO USE REG PRIORITY
+            else{
+                // if not, proceed as normal (standard priority)
+                //Print Process to be scheduled
+                std::cout << "\nProcess to be scheduled: T" << priorityRrScheduler[0][0] << " (Priority: " <<
+                priorityRrScheduler[0][1] <<")\nBurst Remaining: " << priorityRrScheduler[0][2];
+
+                while(burstLeft > 0){
+                    burstLeft--;
+                    priorityRrScheduler[0][2] = burstLeft;
+                    currentTime++;
+                }
+                // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+                int finishTime = 1 + currentTime;
+                int trt = finishTime - 0; // since all tasks arrive at T = 0
+                int waitTime  = trt - burstStart;
+                std::cout << "\nProcess Scheduling Metrics for Process T" << priorityRrScheduler[0][0] << ": " << std::endl;
+                std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+                std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+                std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+                priorityRrScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+            }
+        }
+
+        // There is one element left, so use regular processing
+        else{
+            // if not, proceed as normal (standard priority)
+            //Print Process to be scheduled
+            std::cout << "\nProcess to be scheduled: T" << priorityRrScheduler[0][0] << " (Priority: " <<
+            priorityRrScheduler[0][1] <<")\nBurst Remaining: " << priorityRrScheduler[0][2];
+            while(burstLeft > 0){
+                burstLeft--;
+                priorityRrScheduler[0][2] = burstLeft;
+                currentTime++;
+            }
+            // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+            int finishTime = 1 + currentTime;
+            int trt = finishTime - 0; // since all tasks arrive at T = 0
+            int waitTime  = trt - burstStart;
+            std::cout << "\nProcess Scheduling Metrics for Process T" << priorityRrScheduler[0][0] << ": " << std::endl;
+            std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+            std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+            std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+            priorityRrScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+        }
+    }
+    std::cout << "Priority Round Robin done" << std::endl;
+}
+
 int main(){
     // ********** Q1 *****************
     // Used this as guidance:
@@ -365,8 +496,9 @@ int main(){
     // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
 //    prioritySched();
     // Illustrate RR with a time quantum of 10;
-    basic_rr();
-    // Illustrate Priority with Round RObin
+//    basic_rr();
+    // Illustrate Priority with Round Robin
+    priorityRoundRobin();
 
     return 0;
 }
