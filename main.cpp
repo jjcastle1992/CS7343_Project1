@@ -150,6 +150,16 @@ bool sortcolAsc(std::vector<int> &v1, const std::vector<int> &v2){
     return v1[sortColNum] > v2[sortColNum];
 }
 
+int findIndexByID(const std::vector<std::vector<int>> &vect, int targetID) {
+    for (int i = 0; i < vect.size(); ++i) {
+        if (vect[i][0] == targetID) {
+            return i; // Return the index if ID is found in column 0
+        }
+    }
+    return -1; // Return -1 if ID is not found
+}
+
+
 void sjf(){
     // bring in the process array and make a copy
     std::vector<std::vector<int>> sjfScheduler;
@@ -262,6 +272,73 @@ void prioritySched(){
     std::cout << "Basic Priority done" << std::endl;
 }
 
+void basic_rr() {
+    int timeQuantum = 10;
+    // bring in the process array and make a copy
+    std::vector<std::vector<int>> rrScheduler;
+    rrScheduler = schedAlgos;
+    std::vector<std::vector<int>>::iterator it; // Prep iterator for FIFO queue style ops
+    int currentTime = -1;
+
+    std::cout << "\n****************Basic Round Robin Algorithm Demonstration****************" << std::endl;
+    //Iterate through all processes in a RR fashion
+    while (it != rrScheduler.end()) {
+        it = rrScheduler.begin();
+        int burstStart = rrScheduler[0][2]; // Set Burst time of current process
+        int burstLeft = burstStart;
+
+        //Print Queue
+        std::cout << "\nProcesses in Queue: ";
+        for (int j = 0; j < rrScheduler.size(); j++){
+            std::cout << 'T' << rrScheduler[j][0];
+            if(j < (rrScheduler.size()-1)) {
+                std::cout << " ,";
+            }
+        }
+
+        // Start RR loop
+        int quantumLeft = timeQuantum;
+        //Print Process to be scheduled
+        std::cout << "\nProcess to be scheduled: T" << rrScheduler[0][0] << "\nBurst Remaining: " << rrScheduler[0][2];
+        while((burstLeft > 0) && (quantumLeft > 0)){
+            burstLeft--;
+            rrScheduler[0][2] = burstLeft;
+            currentTime++;
+            quantumLeft--;
+        }
+        if ((burstLeft > 0) && (quantumLeft == 0)) {
+            // Update the time left
+            rrScheduler[0][2] = burstLeft;
+            // Put the current item at the end of the list
+            rrScheduler.push_back(rrScheduler[0]);
+            // Pop it off the front
+            it = rrScheduler.begin();
+            rrScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+            std::cout << "\nQuantum Ended. Burst remaining: " << burstLeft << "\nNew Process Scheduled." <<
+            "\nCurrent Time: "<< currentTime << std::endl;
+        }
+
+        // Swap processes as needed
+
+        if (burstLeft == 0){
+            // Give process stats on finish (TRT, Wait, Finish Time (1 + last scheduled T)
+            int finishTime = 1 + currentTime;
+            int trt = finishTime - 0; // since all tasks arrive at T = 0
+            //Find burstStart of original process
+            const int searchId = rrScheduler[0][0]; // Process ID
+            int originalId = findIndexByID(schedAlgos, searchId); // returns ID of process in schedAlgos
+            burstStart = schedAlgos[originalId][2];  // Sets burst start for process to original value
+            int waitTime  = trt - burstStart;
+            std::cout << "\nProcess Scheduling Metrics for Process T" << rrScheduler[0][0] << ": " << std::endl;
+            std::cout << "\tFinish Time: T = " << finishTime << " seconds" << std::endl;
+            std::cout << "\tWait Time: " << waitTime << " seconds" << std::endl;
+            std::cout << "\tTurnaround Time: " << trt << " seconds" << std::endl;
+            rrScheduler.erase(it); // Erase first thing in vector (i.e. Pop the FIFO queue)
+        }
+    }
+    std::cout << "Basic Round Robin done" << std::endl;
+}
+
 int main(){
     // ********** Q1 *****************
     // Used this as guidance:
@@ -282,13 +359,13 @@ int main(){
     // Write out rep that shows timeline, process loaded, queue, pre-emption, and process completion
 
     // Illustrate FCFS
-    fcfs();
+//    fcfs();
     // Illustrate SJF
-    sjf();
+//    sjf();
     // Illustrate non-Pre-emptive Priority Scheduling (all arive at 0) where highest priority is largest int
-    prioritySched();
+//    prioritySched();
     // Illustrate RR with a time quantum of 10;
-
+    basic_rr();
     // Illustrate Priority with Round RObin
 
     return 0;
